@@ -1,0 +1,148 @@
+import mysql.connector
+from datetime import datetime, timedelta
+import time
+db=mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="1234",
+    database = "csproject1")
+mycursor=db.cursor()
+cursor=db.cursor()
+flag=0
+def create_id():
+    x=input("enter your name")
+    cursor.execute("select * from safety")
+    while True:
+        data=cursor.fetchone()
+        try:
+            if x == data[0]:
+             print("write another name as this one is already taken")
+             create_id()
+        except TypeError:
+            break   
+    f=int(input("enter 8 digit number password"))
+    if f<10000000 or f>99999999:
+        print("8 digit password, numerical")
+        f=int(input("enter 8 digit number password"))
+    y=int(input("mobile no."))
+    if y<1000000000 or y>9999999999:
+        print("enter valid 10 digit mobile no.")
+        y=int(input("enter valid mobile number"))
+    g=int(input("enter age"))
+    if g<13:
+        print("come back when you are older")
+        exit()
+    cursor.execute("insert into accounts(name,age,mobile_number) values(%s,%s,%s)", (x,g,y))
+    mycursor.execute("insert into safety(name,password) values(%s,%s)", (x,f))
+    db.commit()
+    s=cursor.fetchall()
+    g=mycursor.fetchall()
+    flag=1
+    return flag,x
+def login():
+    x=input("enter your name")
+    cursor.execute("select * from safety")
+    while True:
+        data=cursor.fetchone()
+        try:
+            if x == data[0]:
+             y=int(input("enter password"))
+             if y == data[1]:
+                 print("login successful")
+                 flag=1
+                 s=cursor.fetchall()
+                 return flag,x
+             else:
+                 print("wrong password")
+                 break
+        except TypeError:
+            print("enter correct user name")
+            break
+    
+def edit(name):
+    x=int(input("""1. age
+2. mobile number
+3. post(add, edit, remove your post)
+4. address
+5. description
+---enter index no---"""))
+    if x==1:
+        s="age"
+    elif x==2:
+        s="mobile_number"
+    elif x==3:
+        print("under development")
+        exit()
+    elif x==4:
+        s="address"
+    elif x==5:
+        s="description"
+    else:
+        print("woooooow, so cool. look at me i dont follow basic instructions waaah waaah")
+    y=input("enter data to add")
+    if x==1 or x==2:
+        y=int(y)
+    sql = "UPDATE accounts SET " + s + "= %s WHERE name = %s"
+    val = (y,name)
+        #############################################################
+    mycursor.execute(sql,val)
+    result=mycursor.fetchall()
+    db.commit()
+def search():
+    x=int(input("""1. name
+2. mobile number
+3. go back
+----enter index no---"""))
+    if x==1:
+        g="name"
+    elif x==2:
+        g="mobile_number"
+    elif x==3:
+        exit()
+    else:
+        print("you should only type 1 or 2 or 3")
+        search()
+    m=input("search")
+    if x==2:
+        m=int(m)
+    sql="SELECT * FROM accounts WHERE " + g + " = %s "
+    val=[]
+    val.append(m)
+    mycursor.execute(sql,val)
+    #it collects the data in the form of tuple, need to print it(fetchall collects that tuple)
+    result=mycursor.fetchall()
+    for y in result:
+       print (y)
+print("type create id() to create one")
+print("type login() to log in to already existing id")
+print("do you want to create id or log in?")
+mn=input("enter requirement")
+try:
+    if mn == "log in":
+       flag,name = login()
+    elif mn == "create id":
+       flag,name = create_id()
+    else:
+       print("Please type 'log in' or 'create id' only (case sensitive)")
+       exit()
+except TypeError:
+    exit()
+m=input("do you want to proceed y/n")
+if m=="y":
+    mycursor.close()
+    cursor.close()
+    print("**********")
+    mycursor=db.cursor()
+else:
+    exit()
+try:
+    if flag==1:
+        print(name)
+        print("**********")
+        mn=input("enter command edit or search")
+        if mn=="edit":
+            edit(name)
+        elif mn=="search":
+            search()
+except NameError:
+    print("enter correct data, and use functions directly this time create_id() and login()")
