@@ -1,2 +1,2 @@
 # supreme-octo-broccoli
-really just a random project i wanted to do for class 12th cbse
+really just a random project, kind of password encryption ig(not super safe tho)
